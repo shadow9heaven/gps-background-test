@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">gps_foreground_test</string>
+    <string name="stop_collect">停止收集</string>
+    <string name="start_collect">開始收集</string>
+    <string name="reconnect">重新連線</string>
+</resources>
