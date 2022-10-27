@@ -37,12 +37,11 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".MainActivity$LocationUpdatesService"
-        android:enabled="true" android:exported="true"
-        android:foregroundServiceType="location"
+        <service android:name=".LocationUpdateService"
+            android:enabled="true" android:exported="true"
+            android:foregroundServiceType="location"
             tools:ignore="Instantiatable"
-             />
-
+            />
     </application>
 
 </manifest>
