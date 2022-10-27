@@ -55,7 +55,7 @@ const val DEV_WEBSITE_URL = "https://portalapp-dev.wistron.com"
 val WEB_SOCKET_ADDRESS = "ws://10.37.36.61:7890/Android"
 var closed_By_User = false
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     var latitude: Double = 0.0
     var longitude: Double = 0.0
@@ -65,19 +65,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-        setContentView(R.layout.activity_main)
-
         check_permission()
-        val intent = Intent()
-        val pm: PowerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
-        if (!pm.isIgnoringBatteryOptimizations(this.packageName)) {
-            //intent.action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
-            //} else {
-            intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-            intent.data = Uri.parse("package:${this.packageName}")
-            this.startActivity(intent)
-        }
 
+        setContentView(R.layout.activity_main)
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         tv_websocket = findViewById(R.id.tv_WebSocket)
         tv_apiresponse = findViewById(R.id.tv_apiresponse)
@@ -96,6 +86,8 @@ class MainActivity : AppCompatActivity() {
         } else {
             tv_websocket.text = "SDK版本過低"
         }
+
+
     }
 
     override fun onRequestPermissionsResult(
@@ -125,6 +117,23 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onClick(v: View?) {
+        when (v?.id) {
+            R.id.bt_connect -> {
+                clickgetlocation()
+            }
+            R.id.bt_close -> {
+                clickstop()
+            }
+            R.id.bt_reconnet -> {
+                clickreconnect()
+            }
+            R.id.bt_clear -> {
+                clickclear()
+            }
+        }
+    }
+
     override fun onResume() {
         super.onResume()
         tv_websocket = findViewById(R.id.tv_WebSocket)
@@ -134,7 +143,7 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun check_permission(){
+    private fun check_permission() {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -168,6 +177,15 @@ class MainActivity : AppCompatActivity() {
 
             }
         }
+        val intent = Intent()
+        val pm: PowerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
+        if (!pm.isIgnoringBatteryOptimizations(this.packageName)) {
+            //intent.action = Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS
+            //} else {
+            intent.action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+            intent.data = Uri.parse("package:${this.packageName}")
+            this.startActivity(intent)
+        }
     }
 
     private fun startServices() {
@@ -190,6 +208,7 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
+
     private fun stopServices() {
         val serviceIntent = Intent(this, LocationUpdateService::class.java)
         stopService(serviceIntent)
@@ -205,12 +224,7 @@ class MainActivity : AppCompatActivity() {
         return false
     }
 
-
-
-
-
-
-    fun clickgetlocation(view: View) {
+    fun clickgetlocation() {
         //getLocation()
         if (!isMyServiceRunning(LocationUpdateService::class.java)) {
             //textclick = true
@@ -233,13 +247,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    fun clickstop(view: View) {
+    fun clickstop() {
         closed_By_User = true
         stopServices()
     }
 
-    fun clickreconnect(view: View) {}
+    fun clickreconnect() {
 
-    fun clickclear(view: View) {}
+    }
+
+    fun clickclear() {
+
+    }
+
 
 }

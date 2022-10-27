@@ -41,6 +41,7 @@ class LocationUpdateService() : Service() {
     val WEB_SOCKET_INTERVAL = 30L * 1000L
     var WebSocketText = ""
     val uri = URI.create(WEB_SOCKET_ADDRESS)
+
     class JWebSocketClientBinder : Binder() {
         public fun getService(): LocationUpdateService {
             return LocationUpdateService()
@@ -55,7 +56,7 @@ class LocationUpdateService() : Service() {
         override fun run() {
             getLocation()
             // Log.e("DATA", "threadgetlocation")
-            gpsHandler.postDelayed(this,WEB_SOCKET_INTERVAL)
+            gpsHandler.postDelayed(this, WEB_SOCKET_INTERVAL)
         }
     }
 
@@ -107,6 +108,7 @@ class LocationUpdateService() : Service() {
             }
         }
     }
+
     private fun initSocketClient() {
         val uri = URI.create(WEB_SOCKET_ADDRESS)
         client = object : JWebSocketClient(uri) {
@@ -129,14 +131,17 @@ class LocationUpdateService() : Service() {
                         //cant change view in other thread, save message first
 
                         val receive_array = message.split(',')
-                        if(receive_array.size > 1){
+                        if (receive_array.size > 1) {
                             val receive_device_id = receive_array[0].split(':')[1]
-                            if(receive_device_id == Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)){
+                            if (receive_device_id == Settings.Secure.getString(
+                                    contentResolver,
+                                    Settings.Secure.ANDROID_ID
+                                )
+                            ) {
                                 //only show same ID message
                                 WebSocketText = "WebSocket " + currentTime() + " : " + message
                             }
-                        }
-                        else WebSocketText = message
+                        } else WebSocketText = message
                     } catch (e: Exception) {
                         Log.e("JWebOnMsnerror", e.message!!)
                     }
@@ -229,11 +234,10 @@ class LocationUpdateService() : Service() {
 
         //build webSocket connection
         GlobalScope.launch {
-            try{
+            try {
                 initSocketClient()
                 connectSocket(client)
-            }
-            catch(e : Exception){
+            } catch (e: Exception) {
             }
         }
         gpsHandler.postDelayed(gpsRunnable, 0)

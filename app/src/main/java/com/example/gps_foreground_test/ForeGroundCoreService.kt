@@ -12,20 +12,22 @@ import androidx.core.app.NotificationCompat
 class ForegroundCoreService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
-    private var mForegroundNF:ForegroundNF  = ForegroundNF(this)
+    private var mForegroundNF: ForegroundNF = ForegroundNF(this)
 
     override fun onCreate() {
         super.onCreate()
         mForegroundNF.startForegroundNotification()
     }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if(null == intent){
+        if (null == intent) {
             //服务被系统kill掉之后重启进来的
             return START_NOT_STICKY
         }
         mForegroundNF.startForegroundNotification()
         return super.onStartCommand(intent, flags, startId)
     }
+
     override fun onDestroy() {
         mForegroundNF.stopForegroundNotification()
         super.onDestroy()
@@ -39,9 +41,10 @@ class ForegroundNF(private val service: ForegroundCoreService) : ContextWrapper(
         private const val CHANNEL_ID = "app_foreground_service"
         private const val CHANNEL_NAME = "前台保活服务"
     }
+
     private var mNotificationManager: NotificationManager? = null
 
-    private var mCompatBuilder: NotificationCompat.Builder?=null
+    private var mCompatBuilder: NotificationCompat.Builder? = null
 
     private val compatBuilder: NotificationCompat.Builder?
         get() {
@@ -49,13 +52,15 @@ class ForegroundNF(private val service: ForegroundCoreService) : ContextWrapper(
                 val notificationIntent = Intent(this, MainActivity::class.java)
                 notificationIntent.action = Intent.ACTION_MAIN
                 notificationIntent.addCategory(Intent.CATEGORY_LAUNCHER)
-                notificationIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
+                notificationIntent.flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED
                 //动作意图
                 val pendingIntent = PendingIntent.getActivity(
                     this, (Math.random() * 10 + 10).toInt(),
                     notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT
                 )
-                val notificationBuilder: NotificationCompat.Builder = NotificationCompat.Builder(this,CHANNEL_ID)
+                val notificationBuilder: NotificationCompat.Builder =
+                    NotificationCompat.Builder(this, CHANNEL_ID)
                 //标题
                 notificationBuilder.setContentTitle("warn")
                 //通知内容
