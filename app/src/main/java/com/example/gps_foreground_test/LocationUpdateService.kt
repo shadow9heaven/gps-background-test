@@ -17,6 +17,10 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
+
+import com.example.gps_foreground_test.Url.DEV_WEBSITE_URL
+import com.example.gps_foreground_test.Url.WEB_SOCKET_ADDRESS
+
 import com.google.android.gms.location.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -39,15 +43,34 @@ class LocationUpdateService() : Service() {
     private val mBinder: JWebSocketClientBinder = JWebSocketClientBinder();
     val HEART_BEAT_RATE = 3L * 1000L
     val WEB_SOCKET_INTERVAL = 30L * 1000L
-    var WebSocketText = ""
-    val uri = URI.create(WEB_SOCKET_ADDRESS)
+
+    //var WebSocketText = ""
+    var oldColor :Int = Color.BLACK
+    //val uri = URI.create(WEB_SOCKET_ADDRESS)
+
+    var apitext = ""
+    var wstext = ""
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    var currentapiColor = convertIntToColor(oldColor)
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    var currentwsColor  = convertIntToColor(oldColor)
+
+    fun convertIntToColor(input :Int): String{
+        return "#"+ Integer.toString(input, 16)
+    }
     class JWebSocketClientBinder : Binder() {
         public fun getService(): LocationUpdateService {
             return LocationUpdateService()
         }
     }
 
-    override fun onBind(intent: Intent?): IBinder? = mBinder
+    override fun onBind(intent: Intent?): IBinder?{
+        oldColor = intent?.getIntExtra("oldcolor",Color.BLACK)!!
+
+        return mBinder
+    }
 
 
     var gpsHandler = Handler()
@@ -63,7 +86,7 @@ class LocationUpdateService() : Service() {
     //val GCF : GsonConverterFactory = GsonConverterFactory.create()
 
 
-    lateinit var client: JWebSocketClient
+    var client: JWebSocketClient? = null
 
     open class JWebSocketClient(serverUri: URI?) :
         WebSocketClient(serverUri, Draft_6455()) {
@@ -94,12 +117,12 @@ class LocationUpdateService() : Service() {
                 ///not closedby user, needs to reconnect websocket
                 //Log.e("heartbeat", "not closed by user")
                 if (client != null) {
-                    if (client.isClosed()) {
+                    if (client!!.isClosed()) {
                         reconnectWs()
                     }
                 } else {
                     initSocketClient();
-                    connectSocket(client)
+                    client?.let { connectSocket(it) }
                     //        Log.e("heartbeat", "not closed by user")
                 }
                 //Log.e("heartbeat", "heartbeat")
@@ -117,10 +140,11 @@ class LocationUpdateService() : Service() {
 
             override fun onError(ex: Exception) {
                 super.onError(ex)
-                WebSocketText = "WebSocket error:" + ex.message!!
+                wstext = "WebSocket error:" + ex.message!!
                 Log.e("JWebOnError", ex.message!!)
             }
 
+            @SuppressLint("HardwareIds")
             override fun onMessage(message: String?) {
                 //message就是接收到的消息
                 if (message != null) {
@@ -133,16 +157,18 @@ class LocationUpdateService() : Service() {
                             val receive_device_id = receive_array[0].split(':')[1]
                             if(receive_device_id == Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)){
                                 //only show same ID message
-                                WebSocketText = "WebSocket " + currentTime() + " : " + message
+                                wstext = "WebSocket " + currentTime() + " : " + message
                             }
-                        }
-                        else WebSocketText = message
+
+                        } else wstext = message
+
                     } catch (e: Exception) {
                         Log.e("JWebOnMsnerror", e.message!!)
                     }
                 }
             }
 
+            @RequiresApi(Build.VERSION_CODES.O)
             override fun onWebsocketClosing(
                 conn: WebSocket?,
                 code: Int,
@@ -151,9 +177,10 @@ class LocationUpdateService() : Service() {
             ) {
                 super.onWebsocketClosing(conn, code, reason, remote)
                 try {
-                    WebSocketText = "WebSocket closing " + currentTime() + " : " + reason
-                    tv_websocket.text = WebSocketText
-                    tv_websocket.setTextColor(Color.RED)
+                    wstext = "WebSocket closing " + currentTime() + " : " + reason
+                    currentwsColor = convertIntToColor(Color.RED)
+                    //tv_websocket.text = WebSocketText
+                    //tv_websocket.setTextColor(Color.RED)
                     Toast.makeText(
                         applicationContext,
                         "WebSocket closing: " + reason,
@@ -198,7 +225,7 @@ class LocationUpdateService() : Service() {
     override fun onDestroy() {
         super.onDestroy()
         //Log.e("thread", "onDestroy")
-        closeSocket(client)
+        client?.let { closeSocket(it) }
         gpsHandler.removeCallbacks(gpsRunnable)
         heartbeatHandler.removeCallbacks(heartBeatRunnable);
     }
@@ -231,7 +258,7 @@ class LocationUpdateService() : Service() {
         GlobalScope.launch {
             try{
                 initSocketClient()
-                connectSocket(client)
+                client?.let { connectSocket(it) }
             }
             catch(e : Exception){
             }
@@ -296,7 +323,7 @@ class LocationUpdateService() : Service() {
                         try {
                             //send data by websocket
                             Log.e("JSON", outputstring)
-                            sendJSON(client, outputstring)
+                            client?.let { sendJSON(it, outputstring) }
                         } catch (e: Exception) {
                             Log.e("handler", e.message!!)
                         }
@@ -313,15 +340,21 @@ class LocationUpdateService() : Service() {
                             val call =
                                 appApi.postPOC(RequestBody.create(JSON, jsonObject.toString()))
                             call.enqueue(object : Callback<POCResponse> {
+                                @RequiresApi(Build.VERSION_CODES.O)
                                 override fun onFailure(
                                     call: Call<POCResponse>?,
                                     t: Throwable?
                                 ) {
-                                    tv_apiresponse.setTextColor(Color.RED)
-                                    tv_apiresponse.text = "api" + call.toString()
+                                    currentapiColor = convertIntToColor(Color.RED)
+
+                                    //tv_apiresponse.setTextColor(Color.RED)
+                                    //tv_apiresponse.text = "api" + call.toString()
+                                    apitext = "api" + call.toString()
+
                                     Log.e("POCapi", " call ")
                                 }
 
+                                @RequiresApi(Build.VERSION_CODES.O)
                                 override fun onResponse(
                                     call: Call<POCResponse>?,
                                     response: Response<POCResponse>
@@ -332,13 +365,12 @@ class LocationUpdateService() : Service() {
                                     )
 
                                     try {
-                                        if (tv_apiresponse.currentTextColor == Color.RED) tv_apiresponse.setTextColor(
-                                            oldColor
-                                        )
-                                        tv_apiresponse.text =
+                                        if (currentapiColor == convertIntToColor(Color.RED)) currentapiColor = convertIntToColor(oldColor)
+
+                                        apitext =
                                             "api" + currentTime() + " : " + response.body()
                                                 .toString()
-                                        tv_websocket.text = WebSocketText
+                                        //tv_websocket.text = WebSocketText
                                     } catch (e: java.lang.Exception) {
                                         Log.e("api", e.message!!)
                                     }
@@ -384,7 +416,7 @@ class LocationUpdateService() : Service() {
         heartbeatHandler.removeCallbacks(heartBeatRunnable);
         Thread() {
             try { //重連
-                client.reconnectBlocking();
+                client?.reconnectBlocking();
             } catch (e: Exception) {
                 e.printStackTrace();
             }

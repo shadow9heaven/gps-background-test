@@ -102,6 +102,3 @@ class ForegroundNF(private val service: ForegroundCoreService) : ContextWrapper(
     }
 }
 
-//作者：Halifax
-//链接：https://juejin.cn/post/7003992225575075876
-//来源：稀土掘金

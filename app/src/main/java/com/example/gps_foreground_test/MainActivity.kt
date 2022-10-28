@@ -33,6 +33,7 @@ import org.java_websocket.client.WebSocketClient
 import org.java_websocket.drafts.Draft_6455
 import org.java_websocket.handshake.ServerHandshake
 import org.json.JSONObject
+import org.w3c.dom.Text
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -44,21 +45,24 @@ import java.util.*
 
 //var temp = "test"
 
-@SuppressLint("StaticFieldLeak")
-lateinit var tv_websocket: TextView
+var closed_By_User: Boolean = false
 
-@SuppressLint("StaticFieldLeak")
-lateinit var tv_apiresponse: TextView
-var oldColor: Int = Color.BLACK
 
-const val DEV_WEBSITE_URL = "https://portalapp-dev.wistron.com"
-val WEB_SOCKET_ADDRESS = "ws://10.37.36.61:7890/Android"
-var closed_By_User = false
+class MainActivity : AppCompatActivity(), View.OnClickListener {
 
-class MainActivity : AppCompatActivity() {
 
     var latitude: Double = 0.0
     var longitude: Double = 0.0
+
+    var oldColor: Int = Color.BLACK
+
+    //@SuppressLint("StaticFieldLeak")
+    //lateinit var tv_websocket: TextView
+
+    //@SuppressLint("StaticFieldLeak")
+    //lateinit var tv_apiresponse: TextView
+
+
     lateinit var locationManager: LocationManager
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -79,22 +83,22 @@ class MainActivity : AppCompatActivity() {
         }
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        tv_websocket = findViewById(R.id.tv_WebSocket)
-        tv_apiresponse = findViewById(R.id.tv_apiresponse)
+        val tv_websocket = findViewById<TextView>(R.id.tv_WebSocket)
         oldColor = tv_websocket.currentTextColor
         val tv_id = findViewById<TextView>(R.id.tv_id)
         tv_id.text = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
         val SDK_INT = Build.VERSION.SDK_INT
+
         if (SDK_INT >= 26) {
-            if (!shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-                tv_websocket.text =
-                    "目前定位權限:一律許可"
-            } else {
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+//                tv_websocket.text =
+//                    "目前定位權限:一律許可"
+//            } else {
                 tv_websocket.text =
                     "請將定位權限調整為一律許可"
             }
         } else {
-            tv_websocket.text = "SDK版本過低"
+            ///tv_websocket.text = "SDK版本過低"
         }
     }
 
@@ -114,27 +118,31 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         } else if (requestCode == 87) {
-            @RequiresApi(Build.VERSION_CODES.R)
-            if (!shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-                tv_websocket.text =
-                    "目前定位權限:一律許可"
-            } else {
-                tv_websocket.text =
-                    "請將定位權限調整為一律許可"
-            }
+
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+//            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+//                tv_websocket.text =
+//                    "目前定位權限:一律許可"
+//            } else {
+//                tv_websocket.text =
+//                    "請將定位權限調整為一律許可"
+//            }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        tv_websocket = findViewById(R.id.tv_WebSocket)
-        tv_apiresponse = findViewById(R.id.tv_apiresponse)
+        //tv_websocket = findViewById(R.id.tv_WebSocket)
+        //tv_apiresponse = findViewById(R.id.tv_apiresponse)
         val tv_id = findViewById<TextView>(R.id.tv_id)
         tv_id.text = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
     }
 
 
-    private fun check_permission(){
+
+    @SuppressLint("BatteryLife")
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun check_permission() {
         if (ActivityCompat.checkSelfPermission(
                 this,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -241,5 +249,12 @@ class MainActivity : AppCompatActivity() {
     fun clickreconnect(view: View) {}
 
     fun clickclear(view: View) {}
+    override fun onClick(v: View?) {
+        Log.e("onClick",v?.id.toString() )
+        when(v?.id){
+
+        }
+
+    }
 
 }
