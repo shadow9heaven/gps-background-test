@@ -8,6 +8,7 @@ import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 
+//前台保活service "似乎"未使用
 //前台服务
 class ForegroundCoreService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
@@ -106,7 +107,3 @@ class ForegroundNF(private val service: ForegroundCoreService) : ContextWrapper(
         service.stopForeground(true)
     }
 }
-
-//作者：Halifax
-//链接：https://juejin.cn/post/7003992225575075876
-//来源：稀土掘金
