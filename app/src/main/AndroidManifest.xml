@@ -38,10 +38,11 @@
         </activity>
 
         <service android:name=".LocationUpdateService"
-            android:enabled="true" android:exported="true"
+            android:enabled="true"
+            android:exported="true"
             android:foregroundServiceType="location"
             tools:ignore="Instantiatable"
-            />
+             />
     </application>
 
 </manifest>

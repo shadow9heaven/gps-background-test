@@ -4,8 +4,10 @@ package com.example.gps_foreground_test
 import android.Manifest
 import android.annotation.SuppressLint
 import android.app.*
+import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.LocationManager
@@ -20,48 +22,18 @@ import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
-import com.google.android.gms.location.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
-import okhttp3.RequestBody
-import org.java_websocket.WebSocket
-import org.java_websocket.client.WebSocketClient
-import org.java_websocket.drafts.Draft_6455
-import org.java_websocket.handshake.ServerHandshake
-import org.json.JSONObject
-import org.w3c.dom.Text
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.net.URI
-import java.util.*
 
-
-//var temp = "test"
 
 var closed_By_User: Boolean = false
 
-
 class MainActivity : AppCompatActivity(), View.OnClickListener {
-
-
-    var latitude: Double = 0.0
-    var longitude: Double = 0.0
+    var apitext = ""
+    var wstext = ""
 
     var oldColor: Int = Color.BLACK
-
-    //@SuppressLint("StaticFieldLeak")
-    //lateinit var tv_websocket: TextView
-
-    //@SuppressLint("StaticFieldLeak")
-    //lateinit var tv_apiresponse: TextView
-
 
     lateinit var locationManager: LocationManager
 
@@ -70,7 +42,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         super.onCreate(savedInstanceState)
         locationManager = getSystemService(Context.LOCATION_SERVICE) as LocationManager
         setContentView(R.layout.activity_main)
-
+        startReceiver()
         check_permission()
         val intent = Intent()
         val pm: PowerManager = getSystemService(Context.POWER_SERVICE) as PowerManager
@@ -91,10 +63,10 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
         if (SDK_INT >= 26) {
             if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-//                tv_websocket.text =
-//                    "目前定位權限:一律許可"
-//            } else {
-                tv_websocket.text =
+                wstext =
+                    "目前定位權限:一律許可"
+            } else {
+                wstext =
                     "請將定位權限調整為一律許可"
             }
         } else {
@@ -120,13 +92,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         } else if (requestCode == 87) {
 
             shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)
-//            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
-//                tv_websocket.text =
-//                    "目前定位權限:一律許可"
-//            } else {
-//                tv_websocket.text =
-//                    "請將定位權限調整為一律許可"
-//            }
+            if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) {
+                wstext =
+                    "目前定位權限:一律許可"
+            } else {
+                wstext =
+                    "請將定位權限調整為一律許可"
+            }
         }
     }
 
@@ -138,7 +110,12 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         tv_id.text = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
     }
 
-
+    private fun startReceiver(){
+        val receiver = MainReceiver()
+        val filter = IntentFilter()
+        filter.addAction("com.example.gps_foreground_test.LocationUpdateService")
+        this@MainActivity.registerReceiver(receiver, filter)
+    }
 
     @SuppressLint("BatteryLife")
     @RequiresApi(Build.VERSION_CODES.Q)
@@ -254,7 +231,22 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         when(v?.id){
 
         }
-
     }
 
+
+}
+
+
+open class MainReceiver : BroadcastReceiver() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        val bundle = intent.extras
+        //val broadcastType = bundle!!.getString("broadcastType")
+
+        val apitext = bundle!!.getString("apiText")
+        val wstext = bundle!!.getString("wsText")
+        apitext?.let { Log.e("receiver api", it) }
+        wstext?.let { Log.e("receiver ws", it) }
+
+    }
 }

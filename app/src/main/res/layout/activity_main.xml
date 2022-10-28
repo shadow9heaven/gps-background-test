@@ -43,7 +43,7 @@
                 android:layout_marginTop="20dp"
                 android:layout_marginBottom="20dp"
                 android:gravity="center"
-                android:text="@{locationService.wstext}" />
+                android:text="@{mainActivity.wstext}" />
 
 
             <TextView
@@ -51,7 +51,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
-                android:text="@{locationService.apitext}"/>
+                android:text="@{mainActivity.apitext}"/>
 
         </LinearLayout>
 

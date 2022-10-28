@@ -40,6 +40,8 @@ import java.net.URI
 import java.util.*
 
 class LocationUpdateService() : Service() {
+    val SERVICENAME = "com.example.gps_foreground_test.LocationUpdateService"
+
     private val mBinder: JWebSocketClientBinder = JWebSocketClientBinder();
     val HEART_BEAT_RATE = 3L * 1000L
     val WEB_SOCKET_INTERVAL = 30L * 1000L
@@ -350,7 +352,7 @@ class LocationUpdateService() : Service() {
                                     //tv_apiresponse.setTextColor(Color.RED)
                                     //tv_apiresponse.text = "api" + call.toString()
                                     apitext = "api" + call.toString()
-
+                                    sendDisplayString()
                                     Log.e("POCapi", " call ")
                                 }
 
@@ -370,7 +372,7 @@ class LocationUpdateService() : Service() {
                                         apitext =
                                             "api" + currentTime() + " : " + response.body()
                                                 .toString()
-                                        //tv_websocket.text = WebSocketText
+                                        sendDisplayString()
                                     } catch (e: java.lang.Exception) {
                                         Log.e("api", e.message!!)
                                     }
@@ -411,7 +413,13 @@ class LocationUpdateService() : Service() {
             cli.send(message);
         }
     }
-
+    fun sendDisplayString(){
+        val intent = Intent()
+        intent.putExtra("apiText",apitext)
+        intent.putExtra("wsText",wstext)
+        intent.action = SERVICENAME
+        sendBroadcast(intent)
+    }
     private fun reconnectWs() {
         heartbeatHandler.removeCallbacks(heartBeatRunnable);
         Thread() {
