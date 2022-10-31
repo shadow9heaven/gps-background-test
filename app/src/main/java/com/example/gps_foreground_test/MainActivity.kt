@@ -24,17 +24,36 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 
 
 var closed_By_User: Boolean = false
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
-    var apitext = ""
-    var wstext = ""
-
+    var apitext = "testtest123"
+    var wstext = "testtest123"
+    lateinit var receiver: MainReceiver
     var oldColor: Int = Color.BLACK
-
+    var uiHandler: Handler = Handler()
+    var uiRunnable: Runnable = object : Runnable {
+        override fun run() {
+            ///update UI
+            if (apitext != receiver.apitext
+                || wstext != receiver.wstext
+            ) {
+                apitext = receiver.apitext
+                wstext = receiver.wstext
+                runOnUiThread {
+                    val tv_apiresponse = findViewById<TextView>(R.id.tv_apiresponse)
+                    val tv_websocket = findViewById<TextView>(R.id.tv_WebSocket)
+                    tv_apiresponse.text = apitext
+                    tv_websocket.text = wstext
+                }
+            }
+            uiHandler.postDelayed(this, 1000L)
+        }
+    }
     lateinit var locationManager: LocationManager
 
     @RequiresApi(Build.VERSION_CODES.R)
@@ -110,11 +129,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         tv_id.text = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
     }
 
-    private fun startReceiver(){
-        val receiver = MainReceiver()
+    private fun startReceiver() {
+        receiver = MainReceiver()
+
         val filter = IntentFilter()
         filter.addAction("com.example.gps_foreground_test.LocationUpdateService")
         this@MainActivity.registerReceiver(receiver, filter)
+        uiHandler.postDelayed(uiRunnable, 1000)
     }
 
     @SuppressLint("BatteryLife")
@@ -175,9 +196,13 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
             }
         }
     }
+
+
     private fun stopServices() {
         val serviceIntent = Intent(this, LocationUpdateService::class.java)
         stopService(serviceIntent)
+        @RequiresApi(Build.VERSION_CODES.Q)
+        if(uiHandler.hasCallbacks(uiRunnable))uiHandler.removeCallbacks(uiRunnable)
     }
 
     private fun isMyServiceRunning(serviceClass: Class<*>): Boolean {
@@ -189,10 +214,6 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         }
         return false
     }
-
-
-
-
 
 
     fun clickgetlocation(view: View) {
@@ -223,30 +244,32 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         stopServices()
     }
 
-    fun clickreconnect(view: View) {}
+    fun clickreconnect(view: View) {
 
-    fun clickclear(view: View) {}
-    override fun onClick(v: View?) {
-        Log.e("onClick",v?.id.toString() )
-        when(v?.id){
+    }
 
-        }
+    fun clickclear(view: View) {
+
     }
 
 
+    override fun onClick(v: View?) {
+        when (v?.id) {
+
+        }
+    }
 }
 
-
 open class MainReceiver : BroadcastReceiver() {
+    var wstext = "testtest123"
+    var apitext = "testtest123"
 
     override fun onReceive(context: Context, intent: Intent) {
         val bundle = intent.extras
-        //val broadcastType = bundle!!.getString("broadcastType")
-
-        val apitext = bundle!!.getString("apiText")
-        val wstext = bundle!!.getString("wsText")
-        apitext?.let { Log.e("receiver api", it) }
-        wstext?.let { Log.e("receiver ws", it) }
+        apitext = bundle!!.getString("apiText")!!
+        wstext = bundle.getString("wsText")!!
+        Log.e("receiver api", apitext)
+        Log.e("receiver ws", wstext)
 
     }
 }

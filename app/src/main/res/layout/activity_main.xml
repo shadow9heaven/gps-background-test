@@ -3,10 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     >
     <data>
-        <variable
-            name="locationService"
-            type="com.example.gps_foreground_test.LocationUpdateService"
-            />
+
         <variable
             name="mainActivity"
             type="com.example.gps_foreground_test.MainActivity"
@@ -21,10 +18,11 @@
         >
 
         <LinearLayout
+            android:id = "@+id/ll_textview"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            app:layout_constraintBottom_toTopOf="@id/bt_connect"
+            app:layout_constraintBottom_toTopOf="@id/ll_buttons"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
@@ -52,58 +50,49 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="@{mainActivity.apitext}"/>
-
         </LinearLayout>
-
-        <Button
-            android:id="@+id/bt_connect"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id = "@+id/ll_buttons"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/start_collect"
-            android:onClick="clickgetlocation"
+            android:orientation="vertical"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/ll_textview"
+            >
+            <Button
+                android:id="@+id/bt_connect"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/start_collect"
+                android:onClick="clickgetlocation"
+                android:layout_marginBottom="30dp"
+                />
+            <Button
+                android:id="@+id/bt_close"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/stop_collect"
+                android:onClick="clickstop"
+                android:layout_marginBottom="30dp"
+                />
 
-            />
-
-        <Button
-            android:id="@+id/bt_reconnet"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="40dp"
-            android:text="@string/reconnect"
-            android:onClick="clickreconnect"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/bt_connect"
-            app:layout_constraintTop_toTopOf="parent"
-
-            />
-
-        <Button
-
-            android:id="@+id/bt_close"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/stop_collect"
-            android:onClick="clickstop"
-            app:layout_constraintBottom_toTopOf="@id/bt_clear"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/bt_connect" />
-
-        <Button
-            android:id="@+id/bt_clear"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="清除資料"
-            android:onClick="clickclear"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/bt_close" />
-
-
+            <Button
+                android:id="@+id/bt_clear"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="清除資料"
+                android:onClick="clickclear"
+                android:layout_marginBottom="30dp"
+                />
+            <Button
+                android:id="@+id/bt_reconnet"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/reconnect"
+                android:onClick="clickreconnect"
+                />
+        </LinearLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
